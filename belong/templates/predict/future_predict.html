@@ -3,10 +3,10 @@
 {% block content %}
 <div class="container mt-4">
 
-    <h2>📊 1인 고령가구 고독사 장기 예측 (2026~2075)</h2>
+    <h2>📊 1인 고령가구 고독사 장기 예측 (5년 단위 Bar Chart)</h2>
     <hr>
 
-    <!-- 구 선택 폼 -->
+    <!-- 구 선택 -->
     <form method="POST">
         <label for="gu">자치구 선택:</label>
         <select name="gu" class="form-control" style="max-width: 300px;">
@@ -18,49 +18,22 @@
     </form>
 
     {% if records %}
-    <h4 class="mt-4">{{ selected_gu }} (2026~2075)</h4>
+    <h4 class="mt-4">{{ selected_gu }} (2026~2075, 5년 단위 평균)</h4>
 
-    <!-- 표 -->
-    <table class="table table-bordered mt-3">
-        <thead>
-            <tr>
-                <th>연도</th>
-                <th>예측값</th>
-                <th>예측값(명)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in records %}
-            <tr>
-                <td>{{ row['연도'] }}</td>
-                <td>{{ row['예측값']|round(2) }}</td>
-                <td>{{ row['예측값_명'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- 캔버스 -->
+    <canvas id="futureBarChart" width="600" height="300"></canvas>
 
-    <!-- Chart 캔버스 -->
-    <h4 class="mt-4">📈 연도별 예측 추세 그래프</h4>
-    <canvas id="futureChart" width="400" height="200"></canvas>
-
-    <!-- Jinja 데이터를 JSON-safe 블록으로 전달 -->
-    <script type="application/json" id="future-chart-data">
+    <!-- Jinja 데이터를 JSON 형태로 안전하게 전달 -->
+    <script type="application/json" id="future-binned-data">
         {
-            "years": [
-                {% for row in records %}
-                    {{ row['연도'] }}{% if not loop.last %}, {% endif %}
+            "ranges": [
+                {% for rng in year_ranges %}
+                    "{{ rng }}"{% if not loop.last %}, {% endif %}
                 {% endfor %}
             ],
             "values": [
-                {% for row in records %}
-                    {{ row['예측값_명'] }}{% if not loop.last %}, {% endif %}
+                {% for val in binned_values %}
+                    {{ val }}{% if not loop.last %}, {% endif %}
                 {% endfor %}
             ]
         }
-    </script>
-
-    <!-- Chart.js 영역 – VS Code 오류 제거 위해 raw 적용 -->
-    {% raw %}
-    <script>
-        const jsonText = document.getElementByI
